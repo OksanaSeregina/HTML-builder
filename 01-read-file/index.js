@@ -1,3 +1,4 @@
+const readline = require("readline");
 const fs = require("fs");
 const path = require("path");
 
@@ -5,17 +6,23 @@ const path = require("path");
 const FILE_NAME = "text";
 const filePath = path.resolve(__dirname, `${FILE_NAME}.txt`);
 
-// Async function
-async function readFile(path) {
-  try {
-    const data = await fs.promises.readFile(path, "utf8");
-    return data;
-  } catch (err) {
-    console.log(err);
-  }
-}
+try {
+  // Create streams
+  const readable = fs.createReadStream(filePath); // readable stream -> file
+  const writable = process.stdout; // writable stream -> console.log
 
-// Run function
-readFile(filePath)
-  .then((data) => console.log(data))
-  .catch((error) => console.log(error));
+  // Create input and output for readline
+  const rl = readline.createInterface({
+    input: readable,
+    output: writable,
+  });
+
+  // Register event on user input
+  rl.on("data", (line) => {
+    writable.write(line);
+  });
+} catch (error) {
+  // Handle error
+  console.error(error.message);
+  process.exit();
+}
